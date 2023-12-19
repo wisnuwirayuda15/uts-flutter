@@ -1,3 +1,5 @@
+// pages/checkout.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';

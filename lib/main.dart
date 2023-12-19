@@ -1,3 +1,5 @@
+// main.dart
+
 import 'package:flutter/material.dart';
 import 'pages/home.dart';
 import 'pages/detail.dart';
@@ -22,7 +24,6 @@ class MyApp extends StatelessWidget {
         "/checkout": (context) => const Checkout(),
       },
       theme: ThemeData(
-        // colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
     );
