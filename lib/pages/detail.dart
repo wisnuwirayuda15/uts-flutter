@@ -9,6 +9,20 @@ class Detail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic>? args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (args == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Error'),
+        ),
+        body: const Center(
+          child: Text('Failed to retrieve details'),
+        ),
+      );
+    }
+
     return SafeArea(
       child: Scaffold(
         body: Padding(
@@ -21,14 +35,15 @@ class Detail extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsetsDirectional.only(top: 20),
-                  child: detail(context),
+                  child: detail(context, args['image'], args['courseName'],
+                      args['videos'], args['quizzez']),
                 ),
-                description(),
+                descriptions(args['description']),
                 profile(),
                 gallery(),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 20),
-                  child: price(context),
+                  child: price(context, args['price']),
                 ),
               ].divide(const SizedBox(height: 30)),
             ),
@@ -38,7 +53,8 @@ class Detail extends StatelessWidget {
     );
   }
 
-  Widget price(BuildContext context) {
+  Widget price(BuildContext context, double price) {
+    final num = NumberFormat('#,###');
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(0, 50, 0, 0),
       child: Row(
@@ -60,7 +76,7 @@ class Detail extends StatelessWidget {
                 ),
               ),
               Text(
-                'Rp 250,000 / paket',
+                'Rp ${num.format(price)} / paket',
                 style: GoogleFonts.getFont(
                   'Poppins',
                   color: Colors.black,
@@ -72,7 +88,12 @@ class Detail extends StatelessWidget {
           ),
           FFButtonWidget(
             onPressed: () {
-              Navigator.pushNamed(context, '/checkout');
+              // Navigator.pushNamed(context, '/checkout');
+              Navigator.pushNamed(
+                context,
+                '/checkout',
+                arguments: price,
+              );
             },
             text: 'Ambil',
             options: FFButtonOptions(
@@ -221,7 +242,7 @@ class Detail extends StatelessWidget {
     );
   }
 
-  Widget description() {
+  Widget descriptions(String description) {
     return Column(
       mainAxisSize: MainAxisSize.max,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +257,7 @@ class Detail extends StatelessWidget {
           ),
         ),
         Text(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam suscipit tortor ipsum, eget imperdiet eros sodales volutpat.',
+          description,
           style: GoogleFonts.getFont(
             'Poppins',
             color: const Color(0xFF717171),
@@ -248,14 +269,15 @@ class Detail extends StatelessWidget {
     );
   }
 
-  Widget detail(BuildContext context) {
+  Widget detail(BuildContext context, String image, String courseName,
+      int videos, int quizzez) {
     return Container(
       height: 300,
       decoration: BoxDecoration(
         image: DecorationImage(
           fit: BoxFit.cover,
           image: Image.network(
-            'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw0fHxjb21wdXRlcnxlbnwwfHx8fDE2OTk3MDk1MjB8MA&ixlib=rb-4.0.3&q=80&w=400',
+            image,
           ).image,
         ),
         borderRadius: BorderRadius.circular(20),
@@ -311,21 +333,12 @@ class Detail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Flutter Dasar',
+                  courseName,
                   style: GoogleFonts.getFont(
                     'Poppins',
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                     fontSize: 25,
-                  ),
-                ),
-                Text(
-                  'Course untuk pemula',
-                  style: GoogleFonts.getFont(
-                    'Poppins',
-                    color: const Color(0xFFDBDBDB),
-                    fontWeight: FontWeight.normal,
-                    fontSize: 20,
                   ),
                 ),
                 Padding(
@@ -343,7 +356,7 @@ class Detail extends StatelessWidget {
                             size: 20,
                           ),
                           Text(
-                            '15 Videos',
+                            '$videos Videos',
                             style: GoogleFonts.getFont(
                               'Poppins',
                               color: const Color(0xFFDBDBDB),
@@ -362,7 +375,7 @@ class Detail extends StatelessWidget {
                             size: 20,
                           ),
                           Text(
-                            '5 Quizzez',
+                            '$quizzez Quizzez',
                             style: GoogleFonts.getFont(
                               'Poppins',
                               color: const Color(0xFFDBDBDB),

@@ -9,21 +9,21 @@ environment:
     sdk: '>=3.1.2 <4.0.0'
 
 dependencies:
-    flutter:
-        sdk: flutter
+    auto_size_text: 3.0.0
 
     cupertino_icons: 1.0.2
-    google_fonts: 4.0.3
-    font_awesome_flutter: 10.1.0
-    auto_size_text: 3.0.0
+    flutter:
+        sdk: flutter
+    http: ^0.13.6
     flutter_animate: 4.1.1+1
     flutterflow_ui: 0.2.0+1
+    font_awesome_flutter: 10.1.0
+    google_fonts: 4.0.3
 
 dev_dependencies:
+    flutter_lints: ^2.0.0
     flutter_test:
         sdk: flutter
-
-    flutter_lints: ^2.0.0
 
 flutter:
     uses-material-design: true

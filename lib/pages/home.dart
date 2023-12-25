@@ -4,9 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class Home extends StatelessWidget {
   const Home({super.key});
+
+  Future<Map<String, dynamic>> fetchData() async {
+    final response =
+        await http.get(Uri.parse("https://dummyjson.com/products"));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load data");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,71 +46,85 @@ class Home extends StatelessWidget {
   }
 
   Widget recommendation(context) {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Rekomendasi',
-              style: GoogleFonts.getFont(
-                'Poppins',
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
+    return FutureBuilder<Map<String, dynamic>>(
+      future: fetchData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text("Error: ${snapshot.error}");
+        } else {
+          final List<dynamic> products = snapshot.data?['products'];
+          return Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Rekomendasi',
+                    style: GoogleFonts.getFont(
+                      'Poppins',
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 18,
+                    ),
+                  ),
+                  Text(
+                    'See more',
+                    style: GoogleFonts.getFont(
+                      'Poppins',
+                      color: Colors.black,
+                      fontWeight: FontWeight.w300,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
-            ),
-            Text(
-              'See more',
-              style: GoogleFonts.getFont(
-                'Poppins',
-                color: Colors.black,
-                fontWeight: FontWeight.w300,
-                fontSize: 14,
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var product in products)
+                    reCard(
+                      context,
+                      product['id'], //id
+                      product['thumbnail'], //image
+                      product['title'], //courseName
+                      product['description'], //description
+                      product['price'], //price
+                      product['stock'], //video
+                      product['id'], //quiz
+                    ),
+                ].divide(const SizedBox(height: 15)),
               ),
-            ),
-          ],
-        ),
-        Column(
-          mainAxisSize: MainAxisSize.max,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            reCard(
-                context,
-                'https://images.unsplash.com/photo-1501504905252-473c47e087f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxjb3Vyc2V8ZW58MHx8fHwxNjk5NjI2NzM5fDA&ixlib=rb-4.0.3&q=80&w=400',
-                'Laravel dalam 1 bulan',
-                199000,
-                15,
-                5),
-            reCard(
-                context,
-                'https://images.unsplash.com/photo-1531297484001-80022131f5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHx0ZWNofGVufDB8fHx8MTY5OTYyMDI3OHww&ixlib=rb-4.0.3&q=80&w=400',
-                'React dalam 1 bulan',
-                299000,
-                15,
-                5),
-            reCard(
-                context,
-                'https://images.unsplash.com/photo-1589495374906-b7f5ca5de879?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxOHx8cHV6emxlfGVufDB8fHx8MTY5OTYyMDk0MXww&ixlib=rb-4.0.3&q=80&w=400',
-                'Golang dalam 1 bulan',
-                399000,
-                15,
-                5),
-          ].divide(const SizedBox(height: 15)),
-        ),
-      ].divide(const SizedBox(height: 10)),
+            ].divide(const SizedBox(height: 10)),
+          );
+        }
+      },
     );
   }
 
-  Widget reCard(BuildContext context, String image, String courseName,
-      double price, int videos, int quizzez) {
+  Widget reCard(BuildContext context, int id, String image, String courseName,
+      String description, double price, int videos, int quizzez) {
     final num = NumberFormat('#,###');
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/detail');
+        Navigator.pushNamed(
+          context,
+          '/detail',
+          arguments: {
+            'id': id,
+            'image': image,
+            'courseName': courseName,
+            'description': description,
+            'price': price,
+            'videos': videos,
+            'quizzez': quizzez,
+          },
+        );
       },
       child: Row(
         mainAxisSize: MainAxisSize.max,

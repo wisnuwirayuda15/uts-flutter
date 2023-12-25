@@ -18,7 +18,8 @@ class _CheckoutState extends State<Checkout> {
   final num = NumberFormat('#,###');
 
   final String _validCode = "WISNU1202200244";
-  final int _harga = 250000;
+  int get _harga => ModalRoute.of(context)!.settings.arguments as int? ?? 0;
+
   double _totalPrice = 0;
   String _voucher = 'Masukan code';
   String _voucherStatus = '';

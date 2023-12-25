@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Putu Wisnu Wirayuda Putra_1202200244_Flutter',
+      title: 'UAS Flutter - Course API',
       initialRoute: '/home',
       routes: {
         "/home": (context) => const Home(),
