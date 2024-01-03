@@ -54,7 +54,7 @@ class Home extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Text("Error: ${snapshot.error}");
         } else {
-          final List<dynamic> products = snapshot.data?['products'];
+          final List<dynamic> courses = snapshot.data?['products'];
           return Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,7 +64,7 @@ class Home extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Rekomendasi',
+                    'All Courses',
                     style: GoogleFonts.getFont(
                       'Poppins',
                       color: Colors.black,
@@ -87,16 +87,16 @@ class Home extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (var product in products)
+                  for (var courses in courses)
                     reCard(
                       context,
-                      product['id'], //id
-                      product['thumbnail'], //image
-                      product['title'], //courseName
-                      product['description'], //description
-                      product['price'], //price
-                      product['stock'], //video
-                      product['id'], //quiz
+                      courses['id'], //id
+                      courses['thumbnail'], //image
+                      courses['title'], //courseName
+                      courses['description'], //description
+                      courses['price'], //price
+                      courses['stock'], //video
+                      courses['id'], //quiz
                     ),
                 ].divide(const SizedBox(height: 15)),
               ),
