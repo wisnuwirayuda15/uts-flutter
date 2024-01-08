@@ -9,14 +9,24 @@ import 'package:http/http.dart' as http;
 class Home extends StatelessWidget {
   const Home({super.key});
 
-  Future<Map<String, dynamic>> fetchData() async {
-    final response =
-        await http.get(Uri.parse("https://dummyjson.com/products"));
-
+  Future<Map<String, dynamic>> fetchCourses() async {
+    var url = Uri.parse("http://si-sdm.id/ecourse/api/web/v1/courses/all");
+    final response = await http.get(url);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception("Failed to load data");
+      throw Exception("Failed to load courses");
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchCategories() async {
+    var url =
+        Uri.parse("http://si-sdm.id/ecourse/api/web/v1/course-categories/all");
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load categories");
     }
   }
 
@@ -34,7 +44,6 @@ class Home extends StatelessWidget {
               child: header(),
             ),
             filter(),
-            popular(context),
             Padding(
               padding: const EdgeInsetsDirectional.only(bottom: 20),
               child: recommendation(context),
@@ -47,14 +56,14 @@ class Home extends StatelessWidget {
 
   Widget recommendation(context) {
     return FutureBuilder<Map<String, dynamic>>(
-      future: fetchData(),
+      future: fetchCourses(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
         } else if (snapshot.hasError) {
           return Text("Error: ${snapshot.error}");
         } else {
-          final List<dynamic> courses = snapshot.data?['products'];
+          final List<dynamic> courses = snapshot.data?['items'];
           return Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,16 +96,15 @@ class Home extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (var courses in courses)
+                  for (var course in courses)
                     reCard(
                       context,
-                      courses['id'], //id
-                      courses['thumbnail'], //image
-                      courses['title'], //courseName
-                      courses['description'], //description
-                      courses['price'], //price
-                      courses['stock'], //video
-                      courses['id'], //quiz
+                      course['id'], //id
+                      'https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg', //image
+                      course['course_name'], //courseName
+                      course['harga'], //price
+                      course['durasi'], //video
+                      course['durasi'], //quiz
                     ),
                 ].divide(const SizedBox(height: 15)),
               ),
@@ -108,22 +116,14 @@ class Home extends StatelessWidget {
   }
 
   Widget reCard(BuildContext context, int id, String image, String courseName,
-      String description, double price, int videos, int quizzez) {
+      double price, int videos, int quizzez) {
     final num = NumberFormat('#,###');
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
           context,
           '/detail',
-          arguments: {
-            'id': id,
-            'image': image,
-            'courseName': courseName,
-            'description': description,
-            'price': price,
-            'videos': videos,
-            'quizzez': quizzez,
-          },
+          arguments: id,
         );
       },
       child: Row(
@@ -209,63 +209,6 @@ class Home extends StatelessWidget {
           ),
         ].divide(const SizedBox(width: 15)),
       ),
-    );
-  }
-
-  Widget popular(context) {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Populer',
-              style: GoogleFonts.getFont(
-                'Poppins',
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-              ),
-            ),
-            Text(
-              'See more',
-              style: GoogleFonts.getFont(
-                'Poppins',
-                color: Colors.black,
-                fontWeight: FontWeight.w300,
-                fontSize: 14,
-              ),
-            ),
-          ],
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              popCard(
-                  context,
-                  'https://images.unsplash.com/photo-1600087626014-e652e18bbff2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwyMXx8YW5kcm9pZHxlbnwwfHx8fDE2OTk2MjQxOTh8MA&ixlib=rb-4.0.3&q=80&w=400',
-                  'Flutter Dasar',
-                  'Course untuk pemula'),
-              popCard(
-                  context,
-                  'https://images.unsplash.com/photo-1557774058-c9148bc6e481?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxOHx8YW5kcm9pZHxlbnwwfHx8fDE2OTk2MjQxOTh8MA&ixlib=rb-4.0.3&q=80&w=400',
-                  'Flutter Lanjutan',
-                  'Course untuk menengah'),
-              popCard(
-                  context,
-                  'https://images.unsplash.com/photo-1607027340690-37e80b0f1b31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxN3x8YW5kcm9pZHxlbnwwfHx8fDE2OTk2MjQxOTh8MA&ixlib=rb-4.0.3&q=80&w=400',
-                  'Flutter Akhir',
-                  'Course untuk professional'),
-            ].divide(const SizedBox(width: 15)),
-          ),
-        ),
-      ].divide(const SizedBox(height: 10)),
     );
   }
 
@@ -399,41 +342,47 @@ class Home extends StatelessWidget {
             ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(0, 5, 0, 5),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                categoriesBtn('Flutter', true),
-                categoriesBtn('React', false),
-                categoriesBtn('Laravel', false),
-                categoriesBtn('Golang', false),
-              ].divide(const SizedBox(width: 15)),
-            ),
-          ),
+        FutureBuilder<Map<String, dynamic>>(
+          future: fetchCategories(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text("Error: ${snapshot.error}");
+            } else {
+              final categories = snapshot.data?['items'];
+              return Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(0, 5, 0, 5),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      for (var c in categories) categoriesBtn(c['category']),
+                    ].divide(const SizedBox(width: 15)),
+                  ),
+                ),
+              );
+            }
+          },
         ),
       ].divide(const SizedBox(height: 20)),
     );
   }
 
-  Widget categoriesBtn(String text, bool selected) {
-    var select = selected;
+  Widget categoriesBtn(String text) {
     return FFButtonWidget(
-      onPressed: () {
-        select = !select;
-      },
+      onPressed: () {},
       text: text,
       options: FFButtonOptions(
         height: 40,
         padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
         iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-        color: select ? const Color(0xFF38A5E3) : const Color(0xFFEDEDED),
+        color: const Color(0xFF38A5E3),
         textStyle: GoogleFonts.getFont(
           'Poppins',
-          color: select ? Colors.white : Colors.black,
+          color: Colors.white,
           fontSize: 15,
         ),
         borderRadius: BorderRadius.circular(10),

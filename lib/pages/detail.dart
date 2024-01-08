@@ -3,24 +3,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class Detail extends StatelessWidget {
   const Detail({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? args =
-        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    int id = ModalRoute.of(context)!.settings.arguments as int? ?? 0;
 
-    if (args == null) {
+    if (id == 0) {
       return Scaffold(
         appBar: AppBar(
           title: const Text('Error'),
         ),
-        body: const Center(
-          child: Text('Failed to retrieve details'),
+        body: Center(
+          child: Column(children: [
+            const Text('Please select the course from the homepage.'),
+            FFButtonWidget(
+              onPressed: () {
+                // Navigator.pushNamed(context, '/checkout');
+                Navigator.pushNamed(
+                  context,
+                  '/home',
+                  arguments: price,
+                );
+              },
+              text: 'Go to homepage',
+              options: FFButtonOptions(
+                height: 40,
+                padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                iconPadding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                color: const Color(0xFF38A5E3),
+                textStyle: GoogleFonts.getFont(
+                  'Poppins',
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              showLoadingIndicator: false,
+            ),
+          ]),
         ),
       );
+    }
+
+    Future<Map<String, dynamic>> fetchData() async {
+      var url = Uri.parse(
+          "http://si-sdm.id/ecourse/api/web/v1/courses/get-item?id=$id");
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception("Failed to load data");
+      }
     }
 
     return SafeArea(
@@ -28,24 +65,41 @@ class Detail extends StatelessWidget {
         body: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(15, 0, 15, 0),
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(top: 20),
-                  child: detail(context, args['image'], args['courseName'],
-                      args['videos'], args['quizzez']),
-                ),
-                descriptions(args['description']),
-                profile(),
-                gallery(),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
-                  child: price(context, args['price']),
-                ),
-              ].divide(const SizedBox(height: 30)),
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: fetchData(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text("Error: ${snapshot.error}");
+                } else {
+                  final course = snapshot.data?['data'];
+                  return Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(top: 20),
+                        child: detail(
+                            context,
+                            'https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg', //image
+                            course['course_name'],
+                            course['category'],
+                            course['durasi'],
+                            course['durasi']),
+                      ),
+                      descriptions(course['deskripsi']),
+                      profile(course['pengajar']),
+                      gallery(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 20),
+                        child: price(context, course['harga']),
+                      ),
+                    ].divide(const SizedBox(height: 30)),
+                  );
+                }
+              },
             ),
           ),
         ),
@@ -161,7 +215,7 @@ class Detail extends StatelessWidget {
     );
   }
 
-  Widget profile() {
+  Widget profile(String name) {
     return Row(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -188,7 +242,7 @@ class Detail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Jack Smith',
+                  name,
                   style: GoogleFonts.getFont(
                     'Poppins',
                     color: Colors.black,
@@ -270,7 +324,7 @@ class Detail extends StatelessWidget {
   }
 
   Widget detail(BuildContext context, String image, String courseName,
-      int videos, int quizzez) {
+      String category, int videos, int quizzez) {
     return Container(
       height: 300,
       decoration: BoxDecoration(
@@ -339,6 +393,15 @@ class Detail extends StatelessWidget {
                     color: Colors.white,
                     fontWeight: FontWeight.w500,
                     fontSize: 25,
+                  ),
+                ),
+                Text(
+                  category,
+                  style: GoogleFonts.getFont(
+                    'Poppins',
+                    color: const Color(0xFFDBDBDB),
+                    fontWeight: FontWeight.normal,
+                    fontSize: 16,
                   ),
                 ),
                 Padding(
