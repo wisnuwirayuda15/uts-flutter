@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'pages/home.dart';
+import 'pages/category.dart';
 import 'pages/detail.dart';
 import 'pages/checkout.dart';
 
@@ -20,6 +21,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/home',
       routes: {
         "/home": (context) => const Home(),
+        "/category": (context) => const Category(),
         "/detail": (context) => const Detail(),
         "/checkout": (context) => const Checkout(),
       },

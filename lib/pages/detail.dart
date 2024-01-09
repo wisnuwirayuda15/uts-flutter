@@ -11,7 +11,6 @@ class Detail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int id = ModalRoute.of(context)!.settings.arguments as int? ?? 0;
-
     if (id == 0) {
       return Scaffold(
         appBar: AppBar(
@@ -22,11 +21,9 @@ class Detail extends StatelessWidget {
             const Text('Please select the course from the homepage.'),
             FFButtonWidget(
               onPressed: () {
-                // Navigator.pushNamed(context, '/checkout');
                 Navigator.pushNamed(
                   context,
                   '/home',
-                  arguments: price,
                 );
               },
               text: 'Go to homepage',
@@ -73,7 +70,7 @@ class Detail extends StatelessWidget {
                 } else if (snapshot.hasError) {
                   return Text("Error: ${snapshot.error}");
                 } else {
-                  final course = snapshot.data?['data'];
+                  final dynamic course = snapshot.data?['data'];
                   return Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -94,7 +91,8 @@ class Detail extends StatelessWidget {
                       gallery(),
                       Padding(
                         padding: const EdgeInsets.only(bottom: 20),
-                        child: price(context, course['harga']),
+                        child: price(
+                            context, course['course_name'], course['harga']),
                       ),
                     ].divide(const SizedBox(height: 30)),
                   );
@@ -107,7 +105,7 @@ class Detail extends StatelessWidget {
     );
   }
 
-  Widget price(BuildContext context, double price) {
+  Widget price(BuildContext context, String courseName, double price) {
     final num = NumberFormat('#,###');
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(0, 50, 0, 0),
@@ -143,11 +141,8 @@ class Detail extends StatelessWidget {
           FFButtonWidget(
             onPressed: () {
               // Navigator.pushNamed(context, '/checkout');
-              Navigator.pushNamed(
-                context,
-                '/checkout',
-                arguments: price,
-              );
+              Navigator.pushNamed(context, '/checkout',
+                  arguments: [courseName, price]);
             },
             text: 'Ambil',
             options: FFButtonOptions(
@@ -188,6 +183,14 @@ class Detail extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.max,
             children: [
+              galleryImage(
+                  'https://images.unsplash.com/photo-1659813254494-fbf374803c7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxjYWxtaW5nJTIwbmF0dXJlfGVufDB8fHx8MTY5OTYzODExNXww&ixlib=rb-4.0.3&q=80&w=400'),
+              galleryImage(
+                  'https://images.unsplash.com/photo-1692864431050-165164becb51?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw2fHxjYWxtaW5nJTIwbmF0dXJlfGVufDB8fHx8MTY5OTYzODExNXww&ixlib=rb-4.0.3&q=80&w=400'),
+              galleryImage(
+                  'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHw3fHxuYXR1cmV8ZW58MHx8fHwxNjk5NzEyODYxfDA&ixlib=rb-4.0.3&q=80&w=400'),
+              galleryImage(
+                  'https://images.unsplash.com/photo-1682685797507-d44d838b0ac7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MXwxfHNlYXJjaHwxfHxzdW5zZXR8ZW58MHx8fHwxNjk5NjY0NTAwfDA&ixlib=rb-4.0.3&q=80&w=400'),
               galleryImage(
                   'https://images.unsplash.com/photo-1659813254494-fbf374803c7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHNlYXJjaHwxfHxjYWxtaW5nJTIwbmF0dXJlfGVufDB8fHx8MTY5OTYzODExNXww&ixlib=rb-4.0.3&q=80&w=400'),
               galleryImage(

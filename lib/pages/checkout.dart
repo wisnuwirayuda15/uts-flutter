@@ -6,7 +6,6 @@ import 'package:google_fonts/google_fonts.dart';
 
 class Checkout extends StatefulWidget {
   const Checkout({super.key});
-
   @override
   State<Checkout> createState() => _CheckoutState();
 }
@@ -14,21 +13,19 @@ class Checkout extends StatefulWidget {
 class _CheckoutState extends State<Checkout> {
   final _jumlahPaket = TextEditingController();
   final _voucherCode = TextEditingController();
-
   final num = NumberFormat('#,###');
-
   final String _validCode = "WISNU1202200244";
-  int get _harga => ModalRoute.of(context)!.settings.arguments as int? ?? 0;
-
+  dynamic get data =>
+      ModalRoute.of(context)!.settings.arguments ??
+      ['Please visit this page from the homepage', 1];
+  int get _harga => data[1];
   double _totalPrice = 0;
   String _voucher = 'Masukan code';
   String _voucherStatus = '';
   String _jumlah = 'Masukan jumlah paket';
   bool _valid = false;
-
   void _countPrice(jumlahPaket) {
     double paket = double.tryParse(jumlahPaket) ?? 0;
-
     setState(() {
       _totalPrice = _harga * paket;
       _valid ? _totalPrice = _totalPrice * 0.5 : null;
@@ -44,9 +41,7 @@ class _CheckoutState extends State<Checkout> {
       _valid = false;
       _voucherStatus = "VOUCHER NOT FOUND";
     }
-
     _countPrice(_jumlahPaket.text);
-
     setState(() {
       _voucher = _voucherCode.text;
     });
@@ -65,7 +60,7 @@ class _CheckoutState extends State<Checkout> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                info(),
+                info(data[0]),
                 form(),
                 total(),
                 action(),
@@ -311,7 +306,7 @@ class _CheckoutState extends State<Checkout> {
     );
   }
 
-  Widget info() {
+  Widget info(String courseName) {
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -320,7 +315,7 @@ class _CheckoutState extends State<Checkout> {
         Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
           child: Text(
-            'Flutter Dasar',
+            courseName,
             style: GoogleFonts.getFont(
               'Poppins',
               color: Colors.black,

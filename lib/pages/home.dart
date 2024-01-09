@@ -6,16 +6,32 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
 
-  Future<Map<String, dynamic>> fetchCourses() async {
-    var url = Uri.parse("http://si-sdm.id/ecourse/api/web/v1/courses/all");
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  final TextEditingController _searchController = TextEditingController();
+
+  String _searchQuery = '';
+
+  void updateSearchQuery(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
+  Future<Map<String, dynamic>> fetchCourses({String query = ''}) async {
+    var url = Uri.parse(
+        "http://si-sdm.id/ecourse/api/web/v1/courses/search-by-name?name=$query");
     final response = await http.get(url);
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception("Failed to load courses");
+      throw Exception("Failed to load courses.");
     }
   }
 
@@ -26,7 +42,7 @@ class Home extends StatelessWidget {
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception("Failed to load categories");
+      throw Exception("Failed to load categories.");
     }
   }
 
@@ -46,7 +62,7 @@ class Home extends StatelessWidget {
             filter(),
             Padding(
               padding: const EdgeInsetsDirectional.only(bottom: 20),
-              child: recommendation(context),
+              child: allCourses(context),
             ),
           ].divide(const SizedBox(height: 30)),
         ),
@@ -54,9 +70,9 @@ class Home extends StatelessWidget {
     ));
   }
 
-  Widget recommendation(context) {
+  Widget allCourses(context) {
     return FutureBuilder<Map<String, dynamic>>(
-      future: fetchCourses(),
+      future: fetchCourses(query: _searchQuery),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const CircularProgressIndicator();
@@ -97,7 +113,7 @@ class Home extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (var course in courses)
-                    reCard(
+                    courseCard(
                       context,
                       course['id'], //id
                       'https://cdn.pixabay.com/photo/2021/08/04/13/06/software-developer-6521720_1280.jpg', //image
@@ -115,8 +131,8 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget reCard(BuildContext context, int id, String image, String courseName,
-      double price, int videos, int quizzez) {
+  Widget courseCard(BuildContext context, int id, String image,
+      String courseName, double price, int videos, int quizzez) {
     final num = NumberFormat('#,###');
     return GestureDetector(
       onTap: () {
@@ -139,132 +155,77 @@ class Home extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                courseName,
-                style: GoogleFonts.getFont(
-                  'Poppins',
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                'Rp ${num.format(price)}',
-                style: GoogleFonts.getFont(
-                  'Poppins',
-                  color: const Color(0xFF459CFE),
-                  fontWeight: FontWeight.normal,
-                  fontSize: 14,
-                ),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      const Icon(
-                        Icons.video_collection,
-                        color: Color(0x68000000),
-                        size: 20,
-                      ),
-                      Text(
-                        '$videos Videos',
-                        style: GoogleFonts.getFont(
-                          'Poppins',
-                          color: const Color(0x68000000),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ].divide(const SizedBox(width: 10)),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  courseName,
+                  style: GoogleFonts.getFont(
+                    'Poppins',
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const Icon(
-                        Icons.quiz,
-                        color: Color(0x68000000),
-                        size: 20,
-                      ),
-                      Text(
-                        '$quizzez Quizzez',
-                        style: GoogleFonts.getFont(
-                          'Poppins',
-                          color: const Color(0x68000000),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ].divide(const SizedBox(width: 10)),
+                ),
+                Text(
+                  'Rp ${num.format(price)}',
+                  style: GoogleFonts.getFont(
+                    'Poppins',
+                    color: const Color(0xFF459CFE),
+                    fontWeight: FontWeight.normal,
+                    fontSize: 14,
                   ),
-                ].divide(const SizedBox(width: 20)),
-              ),
-            ].divide(const SizedBox(height: 10)),
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const Icon(
+                          Icons.video_collection,
+                          color: Color(0x68000000),
+                          size: 20,
+                        ),
+                        Text(
+                          '$videos Videos',
+                          style: GoogleFonts.getFont(
+                            'Poppins',
+                            color: const Color(0x68000000),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ].divide(const SizedBox(width: 10)),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.quiz,
+                          color: Color(0x68000000),
+                          size: 20,
+                        ),
+                        Text(
+                          '$quizzez Quizzez',
+                          style: GoogleFonts.getFont(
+                            'Poppins',
+                            color: const Color(0x68000000),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ].divide(const SizedBox(width: 10)),
+                    ),
+                  ].divide(const SizedBox(width: 20)),
+                ),
+              ].divide(const SizedBox(height: 10)),
+            ),
           ),
         ].divide(const SizedBox(width: 15)),
-      ),
-    );
-  }
-
-  Widget popCard(BuildContext context, String image, String courseName,
-      String courseDesc) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, '/detail');
-      },
-      child: Container(
-        width: 250,
-        height: 300,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: Image.network(
-              image,
-            ).image,
-          ),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(15, 0, 0, 15),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    courseName,
-                    style: GoogleFonts.getFont(
-                      'Poppins',
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 20,
-                    ),
-                  ),
-                  Text(
-                    courseDesc,
-                    style: GoogleFonts.getFont(
-                      'Poppins',
-                      color: Colors.white,
-                      fontWeight: FontWeight.w200,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -281,6 +242,8 @@ class Home extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 20, 0),
                 child: TextField(
+                  controller: _searchController,
+                  onChanged: updateSearchQuery,
                   obscureText: false,
                   decoration: InputDecoration(
                     labelText: 'Cari course',
@@ -359,7 +322,8 @@ class Home extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      for (var c in categories) categoriesBtn(c['category']),
+                      for (var c in categories)
+                        categoriesBtn(c['category'], c['id']),
                     ].divide(const SizedBox(width: 15)),
                   ),
                 ),
@@ -371,10 +335,16 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget categoriesBtn(String text) {
+  Widget categoriesBtn(String category, int id) {
     return FFButtonWidget(
-      onPressed: () {},
-      text: text,
+      onPressed: () {
+        Navigator.pushNamed(
+          context,
+          '/category',
+          arguments: [category, id],
+        );
+      },
+      text: category,
       options: FFButtonOptions(
         height: 40,
         padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
